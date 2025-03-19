@@ -32,6 +32,8 @@
 
 ## 实现功能
 
+具体功能实现依赖于Linux系统调用，详见代码
+
 ### 块初始化
 
 1. 生成块文件
@@ -94,3 +96,7 @@
 ## 类图
 
 ![UML_class_graph](.\ReadmeImages\UML_class_graph.png)
+
+## 设计结构
+
+![main_structure](./ReadmeImages/main_structure.png)
