@@ -47,6 +47,7 @@ int main(int argc, char** argv){ // argv[0] = 'rm' argv[1] = '-f' argv[1] = 'a.o
 	
 	nmsp_large_file::FileOperation* mainblock = new nmsp_large_file::FileOperation(mainblock_path,O_RDWR|O_LARGEFILE|O_CREAT);
 	
+	// 测试，写入一个4096字节的文件，该文件内容全部为字符'6'
 	char buf[4096];
 	memset(buf,'6',sizeof(buf));
 	

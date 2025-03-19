@@ -58,7 +58,7 @@ namespace nmsp_tfs{
 				memcpy(init_data, &i_header, sizeof(IndexHeader));
 				memset(init_data+sizeof(IndexHeader), 0, i_header.index_file_size_-sizeof(IndexHeader));
 				
-				printf("init_data............%s\n", init_data);
+				printf("init_data............\n");
 
 				
 				// write index header and buckets into index file
