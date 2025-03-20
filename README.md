@@ -95,12 +95,9 @@
 
 ## 类图
 
-<<<<<<< HEAD
-![UML_class_graph](.\ReadmeImages\UML_class_graph.png)
+![UML_class_graph](./ReadmeImages/UML_class_graph.png)
 
 ## 设计结构
 
 ![main_structure](./ReadmeImages/main_structure.png)
-=======
-![UML_class_graph](./ReadmeImages/UML_class_graph.png)
->>>>>>> ae353ac05ed4ed493a07e5ae923396f8def336f8
+
