@@ -4,7 +4,7 @@
 #include <sstream>
 
 using namespace std;
-using namespace nmsp_tfs;
+using namespace nmsp_fsse;
 
 const static nmsp_large_file::MMapOption mmap_option={1024000,4096,4096};
 const static uint32_t main_blocksize = 1024*1024*64; // 主块大小
@@ -16,7 +16,7 @@ static int debug = 1;
 int main(int argc, char** argv){ // argv[0] = 'rm' argv[1] = '-f' argv[1] = 'a.out' 
 	std::string mainblock_path;
 	std::string index_path;
-	int32_t ret = nmsp_large_file::TFS_SUCCESS;
+	int32_t ret = nmsp_large_file::FSSE_SUCCESS;
 	
 	cout<<"Type your blockid:"<<endl;
 	cin >> block_id;
@@ -33,7 +33,7 @@ int main(int argc, char** argv){ // argv[0] = 'rm' argv[1] = '-f' argv[1] = 'a.o
 	
 	ret = index_handle->load(block_id,bucket_size,mmap_option);
 	
-	if(ret!=nmsp_large_file::TFS_SUCCESS){
+	if(ret!=nmsp_large_file::FSSE_SUCCESS){
 		
 		fprintf(stderr,"load index  %d failed\n", block_id);
 		delete index_handle;

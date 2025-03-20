@@ -4,7 +4,7 @@
 #include <sstream>
 
 using namespace std;
-using namespace nmsp_tfs;
+using namespace nmsp_fsse;
 
 const static nmsp_large_file::MMapOption mmap_option={1024000,4096,4096};
 const static uint32_t main_blocksize = 1024*1024*64; // 主块大小
@@ -16,7 +16,7 @@ static int debug = 1;
 int main(int argc, char** argv){ // argv[0] = 'rm' argv[1] = '-f' argv[1] = 'a.out' 
 	std::string mainblock_path;
 	std::string index_path;
-	int32_t ret = nmsp_large_file::TFS_SUCCESS;
+	int32_t ret = nmsp_large_file::FSSE_SUCCESS;
 	
 	cout<<"Type your blockid:"<<endl;
 	cin >> block_id;
@@ -33,7 +33,7 @@ int main(int argc, char** argv){ // argv[0] = 'rm' argv[1] = '-f' argv[1] = 'a.o
 	
 	ret = index_handle->load(block_id,bucket_size,mmap_option);
 	
-	if(ret!=nmsp_large_file::TFS_SUCCESS){
+	if(ret!=nmsp_large_file::FSSE_SUCCESS){
 		
 		fprintf(stderr,"load index  %d failed\n", block_id);
 		delete index_handle;
@@ -55,7 +55,7 @@ int main(int argc, char** argv){ // argv[0] = 'rm' argv[1] = '-f' argv[1] = 'a.o
 	uint32_t file_no = index_handle->block_info()->seq_no_;
 	
 	ret = mainblock->pwrite_file(buf,sizeof(buf),data_offset);
-	if(ret!=nmsp_large_file::TFS_SUCCESS){
+	if(ret!=nmsp_large_file::FSSE_SUCCESS){
 		fprintf(stderr,"write to main block failed, ret: %d, reason: %s\n", ret,strerror(errno));
 		mainblock->close_file();
 		
@@ -72,7 +72,7 @@ int main(int argc, char** argv){ // argv[0] = 'rm' argv[1] = '-f' argv[1] = 'a.o
 	
 	// meta写入哈希桶
 	ret = index_handle->write_segment_meta(meta.get_key(),meta);
-	if(ret == nmsp_large_file::TFS_SUCCESS){
+	if(ret == nmsp_large_file::FSSE_SUCCESS){
 		//1. 更新索引头信息
 		index_handle->commit_block_data_offset(sizeof(buf));
 		
@@ -81,7 +81,7 @@ int main(int argc, char** argv){ // argv[0] = 'rm' argv[1] = '-f' argv[1] = 'a.o
 		
 		//3. 内存数据写入磁盘
 		ret = index_handle->flush();
-		if(ret!=nmsp_large_file::TFS_SUCCESS){
+		if(ret!=nmsp_large_file::FSSE_SUCCESS){
 			fprintf(stderr,"flush block %d failed, file no: %d, reason: %s\n", block_id, file_no, strerror(errno));
 		}
 	}
@@ -89,7 +89,7 @@ int main(int argc, char** argv){ // argv[0] = 'rm' argv[1] = '-f' argv[1] = 'a.o
 		fprintf(stderr,"write_segment_meta block %d failed, file no: %d, reason: %s\n", block_id, file_no, strerror(errno));
 	}
 	
-	if(ret!=nmsp_large_file::TFS_SUCCESS){
+	if(ret!=nmsp_large_file::FSSE_SUCCESS){
 		fprintf(stderr,"write to main block %d failed, file no: %d, reason: %s\n", block_id, file_no, strerror(errno));
 	}
 	else{

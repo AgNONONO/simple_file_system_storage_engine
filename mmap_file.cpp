@@ -1,9 +1,9 @@
 #include "mmap_file.h"
 
 
-static int debug = 1;
+//static int debug = 1;
 
-namespace nmsp_tfs{
+namespace nmsp_fsse{
     namespace nmsp_large_file{
 		MMapFile::MMapFile():
 		size_(0),fd_(-1),data_(NULL){

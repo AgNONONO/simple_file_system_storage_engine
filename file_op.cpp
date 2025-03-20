@@ -1,7 +1,7 @@
 #include "file_op.h"
 #include "common.h"
 
-namespace nmsp_tfs{
+namespace nmsp_fsse{
 	namespace nmsp_large_file{
 		
 		FileOperation::FileOperation(const std::string &file_name, const int open_flags):
@@ -96,7 +96,7 @@ namespace nmsp_tfs{
 			if(fd < 0){
 				return fd;
 			}
-			// fsync: 将缓冲区数据写回磁盘
+			// fsync: 将文件缓冲区数据写回磁盘文件
 			return fsync(fd);
 		}
 		
@@ -139,6 +139,7 @@ namespace nmsp_tfs{
 				}
 				
 				read_len = ::pread64(fd_, p_tmp, left, read_offset);
+				//调用pread相当于顺序调用了lseek 和　read，这两个操作相当于一个捆绑的原子操作
 				
 				if(read_len < 0){
 					// 保存出错原因
@@ -170,7 +171,7 @@ namespace nmsp_tfs{
 				return EXIT_DISK_OPER_INCOMPLETE;
 			}
 			
-			return TFS_SUCCESS;
+			return FSSE_SUCCESS;
 		}
 		
 		
@@ -197,6 +198,7 @@ namespace nmsp_tfs{
 				}
 				
 				write_len = ::pwrite64(fd_, p_tmp, left, write_offset);
+				// 调用pwrite相当于顺序调用了lseek 和　write，这两个操作相当于一个捆绑的原子操作
 				
 				if(write_len < 0){
 					// 保存出错原因
@@ -229,7 +231,7 @@ namespace nmsp_tfs{
 				return EXIT_DISK_OPER_INCOMPLETE;
 			}
 			
-			return TFS_SUCCESS;
+			return FSSE_SUCCESS;
 		}
 		
 
@@ -237,8 +239,8 @@ namespace nmsp_tfs{
 		int FileOperation::write_file(const char* buf, const int32_t nbytes){
 			
 			int32_t left = nbytes; // 剩余字节数
-			int32_t write_len = 0; // 已读取的长度
-			char* p_tmp = (char*)buf; // 存放读取到的数据的位置在buf中
+			int32_t write_len = 0; // 已写的长度
+			char* p_tmp = (char*)buf; // 将buf中的数据写入file_op类成员变量 fd_ 对应的文件
 			
 			int i = 0; // 注意到之前设置了最大读取次数为5
 			
@@ -254,6 +256,7 @@ namespace nmsp_tfs{
 				}
 				
 				write_len = ::write(fd_, p_tmp, left); // 文件指针会自动移动，故无需offset
+				// write是不带缓冲区的函数，会直接写入磁盘
 				
 				if(write_len < 0){
 					// 保存出错原因
@@ -281,7 +284,7 @@ namespace nmsp_tfs{
 				return EXIT_DISK_OPER_INCOMPLETE;
 			}
 			
-			return TFS_SUCCESS;
+			return FSSE_SUCCESS;
 		}
 		
 	}

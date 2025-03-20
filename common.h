@@ -14,15 +14,15 @@
 #include <inttypes.h>
 #include <assert.h>
 
+/* 公共部分 */
 
-namespace nmsp_tfs{
+namespace nmsp_fsse{
 	namespace nmsp_large_file{
 		
 		static int debug = 1;
-
 		
-		const int32_t TFS_SUCCESS = 0;
-		const int32_t TFS_ERROR = -1;
+		const int32_t FSSE_SUCCESS = 0;
+		const int32_t FSSE_ERROR = -1;
 		
 		const int32_t EXIT_DISK_OPER_INCOMPLETE = -8012;
 		// 读或写的长度小于所请求的
@@ -45,11 +45,11 @@ namespace nmsp_tfs{
 			
 		};
 		
-		
+		// 记录内存映射时的可选项
 		struct MMapOption{
-			int32_t max_mmap_size_;
-			int32_t first_mmap_size_;
-			int32_t per_mmap_size_;
+			int32_t max_mmap_size_;     // 最大映射大小
+			int32_t first_mmap_size_;   // 首次映射大小
+			int32_t per_mmap_size_;		// 追加步长
 		};
 		
 		struct BlockInfo{
@@ -74,10 +74,6 @@ namespace nmsp_tfs{
 			
 		};
 		
-		struct RawData{
-			
-			
-		};
 		
 		
 		struct MetaInfo{

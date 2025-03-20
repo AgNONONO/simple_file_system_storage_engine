@@ -4,7 +4,7 @@
 #include "common.h"
 #include "mmap_file_op.h"
 
-namespace nmsp_tfs{
+namespace nmsp_fsse{
 	namespace nmsp_large_file{
 		struct IndexHeader{
 		public:
@@ -24,7 +24,7 @@ namespace nmsp_tfs{
 			IndexHandle(const std::string& base_path,const uint32_t main_block_id);
 			~IndexHandle();
 			
-			//logic_block_id: 指主块id与扩展块id
+			//logic_block_id: 指主块id
 			int create(const uint32_t logic_block_id, const int32_t bucket_size, const MMapOption mmap_option);
 			
 			int load(const uint32_t logic_block_id, const int32_t bucket_size, const MMapOption mmap_option);

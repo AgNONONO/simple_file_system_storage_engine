@@ -4,12 +4,12 @@
 
 
 
-namespace nmsp_tfs{
+namespace nmsp_fsse{
 	namespace nmsp_large_file{
 		IndexHandle::IndexHandle(const std::string& base_path,const uint32_t main_block_id){
-			// create file_op_handle object
+			// 创建 file_op_, 即 index文件 操作对象。 注意到，本系统中index文件编号与其对应的块编号一致
 			std::stringstream tmp_stream;
-			// base_path: /root/zerouser   /index/1
+			// 索引文件路径: /root/zerouser 或者直接使用当前目录 .    INDEX_DIR_PREFIX: /index/1
 			tmp_stream << base_path <<INDEX_DIR_PREFIX << main_block_id;
 			
 			std::string index_path;
@@ -27,7 +27,7 @@ namespace nmsp_tfs{
 		}
 		
 		int IndexHandle::create(const uint32_t logic_block_id, const int32_t bucket_size, const MMapOption mmap_option){
-			int ret = TFS_SUCCESS;
+			int ret = FSSE_SUCCESS;
 			
 			if(debug) printf("create index, block id:%u, bucket size: %d, max_mmap_size: %d, first_mmap_size: %d, per_mmap_size: %d\n", logic_block_id,bucket_size,mmap_option.max_mmap_size_,mmap_option.first_mmap_size_,mmap_option.per_mmap_size_);
 			
@@ -41,7 +41,7 @@ namespace nmsp_tfs{
 			
 			if(file_size<0){
 
-				return TFS_ERROR;
+				return FSSE_ERROR;
 			}
 			else if(file_size==0){
 
@@ -67,12 +67,12 @@ namespace nmsp_tfs{
 				delete[] init_data;
 				init_data = NULL;
 				
-				if(ret!=TFS_SUCCESS){
+				if(ret!=FSSE_SUCCESS){
 					return ret;
 				}
 				ret = file_op_->flush_file();
 				
-				if(ret!=TFS_SUCCESS){
+				if(ret!=FSSE_SUCCESS){
 					return ret;
 				}
 				
@@ -85,7 +85,7 @@ namespace nmsp_tfs{
 			}
 			
 			ret = file_op_->mmap_file(mmap_option);
-			if(ret!=TFS_SUCCESS){
+			if(ret!=FSSE_SUCCESS){
 				return ret;
 			}
 			
@@ -93,7 +93,7 @@ namespace nmsp_tfs{
 			
 			if(debug) printf("init blockid: %u index successful. data file size: %d, index file size: %d, bucket size: %d, free head offset: %d, seqno:%u, filecount:%d, del_size: %d, del_file_count: %d version: %u\n", logic_block_id,index_header()->data_file_offset_,index_header()->index_file_size_,index_header()->bucket_size_,index_header()->free_head_offset_,block_info()->seq_no_,block_info()->file_count_,block_info()->del_size_,block_info()->del_file_count_, block_info()->version_);
 			
-			return TFS_SUCCESS;	
+			return FSSE_SUCCESS;	
 		}
 		
 		
@@ -101,10 +101,10 @@ namespace nmsp_tfs{
 			if(is_load_){
 				return nmsp_large_file::EXIT_INDEX_ALREADY_LOADED_ERROR;
 			}
-			int ret = TFS_SUCCESS;
+			int ret = FSSE_SUCCESS;
 			int64_t file_size = file_op_->get_file_size();
 			if(file_size<0){
-				return TFS_ERROR;
+				return FSSE_ERROR;
 			}
 			else if(file_size==0) // empty file
 			{
@@ -114,13 +114,14 @@ namespace nmsp_tfs{
 			// file_size > 0 映射到内存
 			MMapOption tmp_mmap_option = mmap_option;
 			
+			// 若文件大小 大于 首次映射大小限制，则扩大之
 			if(file_size > tmp_mmap_option.first_mmap_size_ && file_size <= tmp_mmap_option.max_mmap_size_){
 				tmp_mmap_option.first_mmap_size_ = file_size;
 			}
 			
 			ret = file_op_->mmap_file(tmp_mmap_option);
 			
-			if(ret!=TFS_SUCCESS){
+			if(ret!=FSSE_SUCCESS){
 				return ret;
 			}
 			
@@ -154,7 +155,7 @@ namespace nmsp_tfs{
 			if(debug) printf("load blockid: %u index successful. data file size: %d, index file size: %d, bucket size: %d, free head offset: %d, seqno:%u, filecount:%d,del_size: %d, del_file_count: %d version: %u\n", 
 			logic_block_id,index_header()->data_file_offset_,index_header()->index_file_size_,index_header()->bucket_size_,index_header()->free_head_offset_,block_info()->seq_no_,block_info()->file_count_,block_info()->del_size_,block_info()->del_file_count_,block_info()->version_);	
 			
-			return TFS_SUCCESS; 
+			return FSSE_SUCCESS; 
 		}
 		
 		
@@ -168,7 +169,7 @@ namespace nmsp_tfs{
 			}
 			// ?
 			int ret = file_op_->munmap_file();
-			if(ret!=TFS_SUCCESS){
+			if(ret!=FSSE_SUCCESS){
 				return ret;
 			}
 			
@@ -179,7 +180,7 @@ namespace nmsp_tfs{
 		
 		int IndexHandle::flush(){
 			int ret = file_op_->flush_file();
-			if(ret!=TFS_SUCCESS){
+			if(ret!=FSSE_SUCCESS){
 				fprintf(stderr,"Index flush failed! ret: %d, desc: %s\n", ret, strerror(errno));
 			}
 			return ret;
@@ -206,7 +207,7 @@ namespace nmsp_tfs{
 			
 			if(debug) printf("update block info. blockid: %u, version: %u, size: %d. seq_no: %u, filecount:%d,del_size: %d, del_file_count: %d, operType:%d \n",block_info()->block_id_,block_info()->version_, block_info()->size_, block_info()->seq_no_, block_info()->file_count_,block_info()->del_size_,block_info()->del_file_count_, oper_type);	
 			
-			return TFS_SUCCESS;
+			return FSSE_SUCCESS;
 		}
 		
 		
@@ -218,7 +219,7 @@ namespace nmsp_tfs{
 			// 从文件哈希表中查找key hash_find(key, current_offset, pre_offset);
 			int32_t ret = hash_find(key,current_offset, pre_offset);
 			
-			if(ret == TFS_SUCCESS){
+			if(ret == FSSE_SUCCESS){
 				return EXIT_META_UNEXPECT_FOUND_ERROR;
 			}
 			else if(ret!=EXIT_META_NOT_FOUND_ERROR){
@@ -237,7 +238,7 @@ namespace nmsp_tfs{
 			
 			// 1. key是否存在
 			int32_t ret = hash_find(key,current_offset, pre_offset);
-			if(ret == TFS_SUCCESS){// 存在
+			if(ret == FSSE_SUCCESS){// 存在
 				ret = file_op_->pread_file(reinterpret_cast<char*>(&meta),sizeof(MetaInfo),current_offset);
 				return ret;
 			}
@@ -252,14 +253,14 @@ namespace nmsp_tfs{
 			
 			// 1. key是否存在
 			int32_t ret = hash_find(key,current_offset, pre_offset);
-			if(ret != TFS_SUCCESS){// 不存在
+			if(ret != FSSE_SUCCESS){// 不存在
 				return ret;
 			}
 			// 存在，就删除
 			
 			MetaInfo meta;
 			ret = file_op_->pread_file(reinterpret_cast<char*>(&meta),sizeof(MetaInfo),current_offset);
-			if(ret != TFS_SUCCESS){// 没读到
+			if(ret != FSSE_SUCCESS){// 没读到
 				return ret;
 			}
 			
@@ -275,14 +276,14 @@ namespace nmsp_tfs{
 			else{
 				MetaInfo pre_meta;
 				ret = file_op_->pread_file(reinterpret_cast<char*>(&pre_meta),sizeof(MetaInfo),pre_offset);
-				if(ret != TFS_SUCCESS){// 没读到
+				if(ret != FSSE_SUCCESS){// 没读到
 					return ret;
 				}
 				
 				pre_meta.set_next_meta_offset(next_pos);
 				
 				ret = file_op_->pwrite_file(reinterpret_cast<char*>(&pre_meta),sizeof(MetaInfo),pre_offset);
-				if(ret != TFS_SUCCESS){// 没读到
+				if(ret != FSSE_SUCCESS){// 没读到
 					return ret;
 				}	
 			}
@@ -291,7 +292,7 @@ namespace nmsp_tfs{
 			
 			meta.set_next_meta_offset(get_free_head_offset()); // 头插法
 			ret = file_op_->pwrite_file(reinterpret_cast<char*>(&meta),sizeof(MetaInfo),current_offset);
-			if(ret!=TFS_SUCCESS){
+			if(ret!=FSSE_SUCCESS){
 				return ret;
 			}
 			
@@ -301,13 +302,13 @@ namespace nmsp_tfs{
 
 			update_block_info(C_OPER_DELETE, meta.get_size());
 
-			return TFS_SUCCESS;
+			return FSSE_SUCCESS;
 			
 		}
 		
 		
 		int32_t IndexHandle::hash_find(const uint64_t key, int32_t& current_offset, int32_t& pre_offset){
-			int ret = TFS_SUCCESS;
+			int ret = FSSE_SUCCESS;
 			MetaInfo meta_info;
 			
 			current_offset = 0;
@@ -323,13 +324,13 @@ namespace nmsp_tfs{
 			
 			if(pos!=0){
 				ret = file_op_->pread_file(reinterpret_cast<char*>(&meta_info),sizeof(MetaInfo), pos);
-				if(ret!=TFS_SUCCESS){
+				if(ret!=FSSE_SUCCESS){
 					return ret;
 				}
 				
 				if(hash_compare(key, meta_info.get_key())){
 					current_offset = pos;
-					return TFS_SUCCESS;
+					return FSSE_SUCCESS;
 				}
 				pre_offset = pos;
 				pos = meta_info.get_next_meta_offset();
@@ -340,23 +341,24 @@ namespace nmsp_tfs{
 		}
 		
 		int32_t IndexHandle::hash_insert(const uint64_t key, int32_t pre_offset,  MetaInfo& meta){
-			int ret = TFS_SUCCESS;
+			int ret = FSSE_SUCCESS;
 			MetaInfo tmp_meta;
 			int32_t current_offset = 0;
-			//1. 
+			//1. 确定key对应的桶slot
 			int32_t slot = static_cast<uint32_t>(key) % bucket_size();
 			
 			//2. 确定meta存在文件中的偏移
 			// 是否有可重用节点
 			if(get_free_head_offset()!=0){
 				ret = file_op_->pread_file(reinterpret_cast<char*>(&tmp_meta), sizeof(MetaInfo), get_free_head_offset());
-				if(ret!=TFS_SUCCESS){
+				if(ret!=FSSE_SUCCESS){
 					return ret;
 				}
 				current_offset = index_header()->free_head_offset_;
 				
 				if(debug) printf("reuse metainfo, current_offset: %d\n", current_offset);
 				
+				// 取下可重用链的头来用，然后使下一个节点成为新的可重用节点链的头
 				index_header()->free_head_offset_ = tmp_meta.get_next_meta_offset();
 			}
 			else{
@@ -367,7 +369,7 @@ namespace nmsp_tfs{
 			//3. 将meta写入索引文件中
 			meta.set_next_meta_offset(0);
 			ret = file_op_->pwrite_file(reinterpret_cast<char*>(&meta), sizeof(MetaInfo), current_offset);
-			if(ret!=TFS_SUCCESS){
+			if(ret!=FSSE_SUCCESS){
 				index_header()->index_file_size_ -= sizeof(MetaInfo);
 				return ret;
 			}
@@ -376,7 +378,7 @@ namespace nmsp_tfs{
 			if(pre_offset!=0){
 				
 				ret = file_op_->pread_file(reinterpret_cast<char*>(&tmp_meta), sizeof(MetaInfo), pre_offset);
-				if(ret!=TFS_SUCCESS){
+				if(ret!=FSSE_SUCCESS){
 					index_header()->index_file_size_ -= sizeof(MetaInfo);
 					return ret;
 				}
@@ -384,7 +386,7 @@ namespace nmsp_tfs{
 				tmp_meta.set_next_meta_offset(current_offset);
 				
 				ret = file_op_->pwrite_file(reinterpret_cast<const char*>(&tmp_meta), sizeof(MetaInfo), pre_offset);
-				if(ret!=TFS_SUCCESS){
+				if(ret!=FSSE_SUCCESS){
 					index_header()->index_file_size_ -= sizeof(MetaInfo);
 					return ret;
 				}
@@ -394,7 +396,7 @@ namespace nmsp_tfs{
 				
 			}
 			
-			return TFS_SUCCESS;
+			return FSSE_SUCCESS;
 		}
 		
 	}

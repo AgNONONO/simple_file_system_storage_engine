@@ -6,15 +6,15 @@
 #include <sys/mman.h>
 #include "common.h"
 
-namespace nmsp_tfs{
+namespace nmsp_fsse{
     namespace nmsp_large_file{
 	
-	
+	// 内存映射类
 	class MMapFile{
 	    public:
 	      MMapFile();
-	      explicit MMapFile(const int fd);
-	      MMapFile(const MMapOption& mmap_option, const int fd);
+	      explicit MMapFile(const int fd); // 显示构造，防止赋值隐式转换
+	      MMapFile(const MMapOption& mmap_option, const int fd); 
 	      
 	      ~MMapFile();
 
@@ -29,7 +29,7 @@ namespace nmsp_tfs{
 	    private:
 	      bool ensure_file_size(const int32_t size); // 调整映射大小
   	      
-	      int32_t size_;
+	      int32_t size_;	// 映射文件的大小
 	      int fd_;
 	      void* data_;
 	      struct MMapOption mmap_file_option_;
