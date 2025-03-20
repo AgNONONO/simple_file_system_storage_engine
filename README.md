@@ -10,13 +10,15 @@ Linux下，需安装以下工具
 - `gcc 4.8.5`
 - `g++ 4.8.5`
 
-编译命令`$ make`，生成以下可执行文件
+使用命令`$ make`完成编译，生成以下可执行文件
 
 - `blockInitTest`：块与索引初始化
 - `blockStateTest`：显示指定块的当前信息
 - `blockWriteTest`：块中文件写入
 - `blockReadTest`：块中文件读取
 - `blockDeleteTest`：块中文件删除
+
+亦可自行修改相应`*test.cpp`文件
 
 ## 设计
 
